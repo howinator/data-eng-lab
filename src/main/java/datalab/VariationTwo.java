@@ -1,5 +1,4 @@
 package datalab;
-import javax.xml.crypto.Data;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -14,21 +13,13 @@ public class VariationTwo implements DataToInsert {
 
     public VariationTwo(Integer numEle){
         numElements = numEle;
-        randomData = new RandomData();
-        primaryKey = generatePrimaryKey();
+        randomData = new RandomData(numElements);
+        primaryKey = randomData.generatePrimaryKey();
+        Collections.shuffle(primaryKey);
         columnA = randomData.generateColumn();
         columnB = randomData.generateColumn();
         textColumn = randomData.generateText();
     }
-    private ArrayList<Integer> generatePrimaryKey() {
-        ArrayList<Integer> key = new ArrayList<Integer>(numElements);
-        for (int i = 0; i < numElements; i++){
-            key.add(i);
-        }
-        Collections.shuffle(key);
-        return key;
-    }
-
     @Override
     public ArrayList<Integer> getPrimaryKey() {
         return primaryKey;

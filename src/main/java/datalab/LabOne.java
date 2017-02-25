@@ -1,6 +1,5 @@
 package datalab;
 import java.sql.*;
-import java.util.Objects;
 
 /**
  * Created by howie on 2/21/17.
@@ -24,19 +23,19 @@ public class LabOne {
             Integer numRows = 5000000;
             resetDatabase(connection);
             createTable(connection);
+
             VariationOne firstVariationData = new VariationOne(numRows);
             VariationTwo secondVariationData = new VariationTwo(numRows);
+
             connection.setAutoCommit(false);
 
-            long startTime = System.currentTimeMillis();
             loadRows(firstVariationData, connection, numRows);
-            long endTime = System.currentTimeMillis();
-            System.out.println("First operation took" + ((endTime - startTime) / 1000) + " seconds.");
+
             resetDatabase(connection);
-            startTime = System.currentTimeMillis();
+            createTable(connection);
+
             loadRows(secondVariationData, connection, numRows);
-            endTime = System.currentTimeMillis();
-            System.out.println("Second operation took" + ((endTime - startTime) / 1000) + " seconds.");
+
 
         } catch (SQLException e){
             e.printStackTrace();
@@ -52,6 +51,7 @@ public class LabOne {
     private static void loadRows(DataToInsert data, Connection con, Integer numberRows) {
         String baseQuery;
         baseQuery = "INSERT INTO benchmark (theKey, columnA, columnB, filler) VALUES (?, ?, ?, ?);";
+        String variationName = data.getClass().getName();
         try {
             PreparedStatement stmt = con.prepareStatement(baseQuery);
             for (int i = 0; i < numberRows; i++) {
@@ -61,7 +61,10 @@ public class LabOne {
                 stmt.setString(4, data.getTextColumn().get(i));
                 stmt.addBatch();
             }
+            long startTime = System.currentTimeMillis();
             stmt.executeBatch();
+            long endTime = System.currentTimeMillis();
+            System.out.println(variationName + " took " + ((endTime - startTime) / 1000) + " seconds.");
         } catch (SQLException e) {
         }
     }
@@ -86,15 +89,14 @@ public class LabOne {
 
     private static void resetDatabase(Connection con) {
         String dropStr;
-        Statement dropstatement;
+        Statement dropStatement;
         dropStr = "DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public to postgres; GRANT ALL ON SCHEMA public to public;";
         try {
-            dropstatement = con.createStatement();
-            dropstatement.executeUpdate(dropStr);
+            dropStatement = con.createStatement();
+            dropStatement.executeUpdate(dropStr);
         } catch (SQLException e) {
             System.out.println("Could not drop public schema");
             e.printStackTrace();
         }
     }
 }
-

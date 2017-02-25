@@ -12,8 +12,17 @@ import java.util.stream.IntStream;
 public class RandomData {
     private Integer numElements;
 
-    public RandomData() {
-        numElements = 5000000;
+    public RandomData(Integer numEle) {
+        numElements = numEle;
+    }
+
+
+    public ArrayList<Integer> generatePrimaryKey() {
+        ArrayList<Integer> key = new ArrayList<Integer>(numElements);
+        for (int i = 0; i < numElements; i++){
+            key.add(i);
+        }
+        return key;
     }
 
     public ArrayList<Integer> generateColumn() {
