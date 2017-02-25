@@ -1,5 +1,6 @@
 package datalab;
 import java.sql.*;
+import java.util.ArrayList;
 
 /**
  * Created by howie on 2/21/17.
@@ -46,6 +47,17 @@ public class LabOne {
             }
         }
 
+    }
+
+    private static void printLatexRow(ArrayList<Integer> results, Integer runNumber){
+        String prefix, eleList, fullRow;
+        eleList = "";
+        prefix = "    \\multicolumn{2}{|r|}{" + runNumber.toString() + "} ";
+        for (Integer ele : results) {
+            eleList = "& " + ele.toString() + " ";
+        }
+        fullRow = prefix + eleList + "\\\\\n \\hline";
+        System.out.print(fullRow);
     }
 
     private static void loadRows(DataToInsert data, Connection con, Integer numberRows) {

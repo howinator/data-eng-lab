@@ -1,0 +1,54 @@
+\documentclass[12pt]{article}
+ \usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amsthm,amssymb,amsfonts,algorithm,algpseudocode,algorithmicx,xfrac,tabularx,array}
+
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+
+\newenvironment{problem}[2][Problem]{\begin{trivlist}
+\item[\hskip \labelsep {\bfseries #1}\hskip \labelsep {\bfseries #2.}]}{\end{trivlist}}
+\newenvironment{subproblem}[1]{\textbf{(#1)}}{}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+%If you want to title your bold things something different just make another thing exactly like this but replace "problem" with the name of the thing you want, like theorem or lemma or whatever
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+
+\begin{document}
+
+%\renewcommand{\qedsymbol}{\filledbox}
+%Good resources for looking up how to do stuff:
+%Binary operators: http://www.access2science.com/latex/Binary.html
+%General help: http://en.wikibooks.org/wiki/LaTeC/Mathematics
+%Or just google stuff
+
+\title{Data ENgineering - Lab}
+\author{Howie Benefiel \(phb337\)}
+\maketitle
+
+
+\begin{table}[ht]
+\caption{Speed, Uncompressed}
+\centering
+\begin{tabularx}{\linewidth}{l|l|*{8}{C|}}
+    \cline{3-10}
+    \multicolumn{2}{c|}{}&\multicolumn{2}{c|}{Load Time} & \multicolumn{2}{c|}{Query 1} & \multicolumn{2}{c|}{Query 2} & \multicolumn{2}{c|}{Query 3} \\
+    \cline{2-10}
+     & Data Generator & I & II & I & II & I & II & I & II \\
+    \cline{1-10}
+    \multicolumn{2}{|l|}{Physical Organization} & \multicolumn{8}{c|}{$ $} \\
+    \hline
+    \multicolumn{2}{|r|}{1} & & & & & & & & \\
+    \hline
+
+
+
+\end{tabularx}
+\end{table}
+
+
+\end{document}
