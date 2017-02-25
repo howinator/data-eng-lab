@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * Created by howie on 2/22/17.
+ * Created with loving care by howie on 2/22/17.
  */
 public class VariationTwo implements DataToInsert {
     private ArrayList<Integer> primaryKey, columnA, columnB;
@@ -11,13 +11,13 @@ public class VariationTwo implements DataToInsert {
     private Integer numElements;
     private RandomData randomData;
 
-    public VariationTwo(Integer numEle){
+    public VariationTwo(Integer numEle, Integer minColValue, Integer maxColValue){
         numElements = numEle;
         randomData = new RandomData(numElements);
         primaryKey = randomData.generatePrimaryKey();
         Collections.shuffle(primaryKey);
-        columnA = randomData.generateColumn();
-        columnB = randomData.generateColumn();
+        columnA = randomData.generateColumn(minColValue, maxColValue);
+        columnB = randomData.generateColumn(minColValue, maxColValue);
         textColumn = randomData.generateText();
     }
     @Override

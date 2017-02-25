@@ -2,7 +2,7 @@ package datalab;
 import java.util.ArrayList;
 
 /**
- * Created by howie on 2/22/17.
+ * Created with loving care by howie on 2/22/17.
  */
 public class VariationOne implements DataToInsert {
     private ArrayList<Integer> primaryKey, columnA, columnB;
@@ -10,12 +10,12 @@ public class VariationOne implements DataToInsert {
     private Integer numElements;
     private RandomData randomData;
 
-    public VariationOne(Integer numEle){
+    public VariationOne(Integer numEle, Integer minColValue, Integer maxColValue){
         numElements = numEle;
         randomData = new RandomData(numElements);
         primaryKey = randomData.generatePrimaryKey();
-        columnA = randomData.generateColumn();
-        columnB = randomData.generateColumn();
+        columnA = randomData.generateColumn(minColValue, maxColValue);
+        columnB = randomData.generateColumn(minColValue, maxColValue);
         textColumn = randomData.generateText();
     }
 

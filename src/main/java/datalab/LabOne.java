@@ -1,9 +1,10 @@
 package datalab;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
- * Created by howie on 2/21/17.
+ * Created with loving care by howie on 2/21/17.
  */
 
 public class LabOne {
@@ -16,98 +17,46 @@ public class LabOne {
             return;
         }
 
-        Connection connection = null;
+        Integer numRows = 100000;
+        Integer minColValue = 1;
+        Integer maxColValue = 50000;
+        TestDatabase tdb = new TestDatabase(numRows);
 
         try {
-            // I know to not normally code db credentials into my code
-            connection = DriverManager.getConnection("jdbc:postgresql://localhost:32768/postgres", "postgres", "postgres");
-            Integer numRows = 150000;
-            resetDatabase(connection);
-            createTable(connection);
+            tdb.openCon();
+            tdb.resetDatabase();
 
-            VariationOne firstVariationData = new VariationOne(numRows);
-            VariationTwo secondVariationData = new VariationTwo(numRows);
+            VariationOne firstVariationData = new VariationOne(numRows, minColValue, maxColValue);
+            VariationTwo secondVariationData = new VariationTwo(numRows, minColValue, maxColValue);
 
-            connection.setAutoCommit(false);
-
-            loadRows(firstVariationData, connection, numRows);
-
-            resetDatabase(connection);
-            createTable(connection);
-
-            loadRows(secondVariationData, connection, numRows);
+            tdb.loadRows(firstVariationData);
+            tdb.resetDatabase();
+            tdb.loadRows(secondVariationData);
 
             Integer numRuns = 5;
+            ArrayList<Integer> testCases = generateTestCase(numRuns, minColValue, maxColValue);
 
 
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             try {
-                connection.close();
+                tdb.closeCon();
             } catch (SQLException se) {
             }
         }
 
     }
 
-    private static void loadRows(DataToInsert data, Connection con, Integer numberRows) throws SQLException {
-        String baseQuery;
-        baseQuery = "INSERT INTO benchmark (theKey, columnA, columnB, filler) VALUES (?, ?, ?, ?);";
-        String variationName = data.getClass().getName();
-        PreparedStatement stmt = con.prepareStatement(baseQuery);
-        for (int i = 0; i < numberRows; i++) {
-            stmt.setInt(1, data.getPrimaryKey().get(i));
-            stmt.setInt(2, data.getColumnA().get(i));
-            stmt.setInt(3, data.getColumnB().get(i));
-            stmt.setString(4, data.getTextColumn().get(i));
-            stmt.addBatch();
+    private static ArrayList<Integer> generateTestCase(Integer numTests, Integer minValue, Integer maxValue) {
+        ArrayList<Integer> testCases = new ArrayList<>(numTests);
+        Random rando = new Random();
+        for (int i = 0; i < numTests; i++) {
+            testCases.add(rando.nextInt(maxValue) + minValue);
         }
-        long startTime = System.currentTimeMillis();
-        stmt.executeBatch();
-        con.commit();
-        long endTime = System.currentTimeMillis();
-        System.out.println(variationName + " took " + ((endTime - startTime) / 1000.0) + " seconds.");
+        return testCases;
     }
 
-    private static void createSingleConfig(Connection con, String colName) throws SQLException {
-        String indexStr;
-        Statement indexStmt;
-        indexStr = "CREATE INDEX " + colName + "_idx ON benchmark (" + colName + ");";
-        indexStmt = con.createStatement();
-        indexStmt.executeUpdate(indexStr);
-    }
-
-    private static void createBothConfig(Connection con) throws SQLException {
-        createSingleConfig(con, "columnA");
-        createSingleConfig(con, "columnB");
-    }
-
-    private static void createTable(Connection con) throws SQLException {
-        String createStr;
-        Statement createStatement;
-        createStr = "CREATE TABLE benchmark (theKey INTEGER PRIMARY KEY, columnA INTEGER, columnB INTEGER, filler CHAR(247));";
-
-        try {
-            createStatement = con.createStatement();
-            createStatement.executeUpdate(createStr);
-
-        } catch (SQLException e) {
-            if (e.getMessage().contains("relation \"benchmark\" already exists")) {
-                System.out.println("relation already exists");
-            } else {
-                throw e;
-            }
-        }
-    }
-
-    private static void resetDatabase(Connection con) throws SQLException {
-        String dropStr;
-        Statement dropStatement;
-        dropStr = "DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public to postgres; GRANT ALL ON SCHEMA public to public;";
-        dropStatement = con.createStatement();
-        dropStatement.executeUpdate(dropStr);
-    }
 
     private static void printLatexRow(ArrayList<Integer> results, Integer runNumber) {
         String prefix, eleList, fullRow;

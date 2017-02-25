@@ -1,13 +1,14 @@
 package datalab;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
- * Created by howie on 2/23/17.
+ * Created with loving care by howie on 2/23/17.
  */
 public class RandomData {
     private Integer numElements;
@@ -25,14 +26,23 @@ public class RandomData {
         return key;
     }
 
-    public ArrayList<Integer> generateColumn() {
-        ArrayList<Integer> colValues = new ArrayList<Integer>(numElements);
-        Integer maxValue = 50000;
-        Integer minValue = 1;
-        Random rando = new Random();
+//    public ArrayList<Integer> generateColumn() {
+//        ArrayList<Integer> colValues = new ArrayList<Integer>(numElements);
+//        Integer maxValue = 50000;
+//        Integer minValue = 1;
+//        Random rando = new Random();
+//        for (int i = 0; i < numElements; i++) {
+//            colValues.add(rando.nextInt(maxValue) + minValue);
+//        }
+//        return colValues;
+//    }
+
+    public ArrayList<Integer> generateColumn(Integer minValue, Integer maxValue) {
+        ArrayList<Integer> colValues = new ArrayList<>(numElements);
         for (int i = 0; i < numElements; i++) {
-            colValues.add(rando.nextInt(maxValue) + minValue);
+            colValues.add(i % maxValue + minValue);
         }
+        Collections.shuffle(colValues);
         return colValues;
     }
     public ArrayList<String> generateText() {
