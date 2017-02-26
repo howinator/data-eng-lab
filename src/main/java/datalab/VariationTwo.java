@@ -14,11 +14,27 @@ public class VariationTwo implements DataToInsert {
     public VariationTwo(Integer numEle, Integer minColValue, Integer maxColValue){
         numElements = numEle;
         randomData = new RandomData(numElements);
-        primaryKey = randomData.generatePrimaryKey();
+        primaryKey = generatePrimaryKey();
         Collections.shuffle(primaryKey);
         columnA = randomData.generateColumn(minColValue, maxColValue);
         columnB = randomData.generateColumn(minColValue, maxColValue);
         textColumn = randomData.generateText();
+    }
+
+    private ArrayList<Integer> generatePrimaryKey() {
+        Integer domainOfIntegers = 5000000;
+        ArrayList<Integer> masterList = new ArrayList<>(domainOfIntegers);
+        ArrayList<Integer> colValues = new ArrayList<>(numElements);
+        for (int i = 0; i < domainOfIntegers; i++) {
+            masterList.add(i);
+        }
+        Collections.shuffle(masterList);
+        for (int j = 0; j < numElements; j++) {
+            colValues.add(masterList.get(j));
+        }
+        masterList = null;
+        System.gc();
+        return colValues;
     }
     @Override
     public ArrayList<Integer> getPrimaryKey() {

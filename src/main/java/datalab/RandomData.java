@@ -18,14 +18,6 @@ public class RandomData {
     }
 
 
-    public ArrayList<Integer> generatePrimaryKey() {
-        ArrayList<Integer> key = new ArrayList<Integer>(numElements);
-        for (int i = 0; i < numElements; i++){
-            key.add(i);
-        }
-        return key;
-    }
-
 //    public ArrayList<Integer> generateColumn() {
 //        ArrayList<Integer> colValues = new ArrayList<Integer>(numElements);
 //        Integer maxValue = 50000;

@@ -13,10 +13,18 @@ public class VariationOne implements DataToInsert {
     public VariationOne(Integer numEle, Integer minColValue, Integer maxColValue){
         numElements = numEle;
         randomData = new RandomData(numElements);
-        primaryKey = randomData.generatePrimaryKey();
+        primaryKey = generatePrimaryKey();
         columnA = randomData.generateColumn(minColValue, maxColValue);
         columnB = randomData.generateColumn(minColValue, maxColValue);
         textColumn = randomData.generateText();
+    }
+
+    public ArrayList<Integer> generatePrimaryKey() {
+        ArrayList<Integer> key = new ArrayList<Integer>(numElements);
+        for (int i = 0; i < numElements; i++){
+            key.add(i);
+        }
+        return key;
     }
 
     @Override

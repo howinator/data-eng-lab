@@ -1,7 +1,6 @@
 package datalab;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Created with loving care by howie on 2/21/17.
@@ -17,10 +16,23 @@ public class LabOne {
             return;
         }
 
-        Integer numRows = 100000;
+        Integer numRows = 5000000;
         Integer minColValue = 1;
         Integer maxColValue = 50000;
-        TestDatabase tdb = new TestDatabase(numRows);
+        String columnAName = "columnA";
+        String columnBName = "columnB";
+        String noIndex = "noIndex";
+        if (numRows < maxColValue) {
+            maxColValue = numRows;
+        }
+        Integer numTests = 3;
+        ArrayList<Integer> testSetA = generateTestCases(numTests, minColValue, maxColValue);
+        ArrayList<Integer> testSetB = generateTestCases(numTests, minColValue, maxColValue);
+        Map<String, ArrayList<Integer>> fullTestSet = new HashMap<>();
+        fullTestSet.put(columnAName, testSetA);
+        fullTestSet.put(columnBName, testSetB);
+
+        TestDatabase tdb = new TestDatabase(numRows, columnAName, columnBName, fullTestSet, noIndex);
 
         try {
             tdb.openCon();
@@ -33,8 +45,11 @@ public class LabOne {
             tdb.resetDatabase();
             tdb.loadRows(secondVariationData);
 
-            Integer numRuns = 5;
-            ArrayList<Integer> testCases = generateTestCase(numRuns, minColValue, maxColValue);
+
+            Map<String, ArrayList<Long>> testResultsLoadOne, testResultsLoadTwo = new HashMap<>();
+            testResultsLoadOne = tdb.runOneGeneratorTests(firstVariationData);
+            testResultsLoadTwo = tdb.runOneGeneratorTests(secondVariationData);
+            formLatexRows(testResultsLoadOne, testResultsLoadTwo);
 
 
         } catch (SQLException e) {
@@ -48,7 +63,22 @@ public class LabOne {
 
     }
 
-    private static ArrayList<Integer> generateTestCase(Integer numTests, Integer minValue, Integer maxValue) {
+    private static void formLatexRows(Map<String, ArrayList<Long>> rs1, Map<String, ArrayList<Long>> rs2) {
+       ArrayList<Long> latexRow = new ArrayList<Long>();
+       Integer numQueryTypes = 3;
+       Integer physOrgNum = 1;
+       for (String key : rs1.keySet()) {
+           for (int i = 0; i < numQueryTypes; i++) {
+               latexRow.add(rs1.get(key).get(i));
+               latexRow.add(rs1.get(key).get(i));
+           }
+           printLatexRow(latexRow, physOrgNum++);
+           latexRow.clear();
+       }
+    }
+
+
+    private static ArrayList<Integer> generateTestCases(Integer numTests, Integer minValue, Integer maxValue) {
         ArrayList<Integer> testCases = new ArrayList<>(numTests);
         Random rando = new Random();
         for (int i = 0; i < numTests; i++) {
@@ -58,14 +88,14 @@ public class LabOne {
     }
 
 
-    private static void printLatexRow(ArrayList<Integer> results, Integer runNumber) {
+    private static void printLatexRow(ArrayList<Long> results, Integer runNumber) {
         String prefix, eleList, fullRow;
         eleList = "";
         prefix = "    \\multicolumn{2}{|r|}{" + runNumber.toString() + "} ";
-        for (Integer ele : results) {
-            eleList = "& " + ele.toString() + " ";
+        for (Long ele : results) {
+            eleList = eleList + "& " + ele.toString() + " ";
         }
         fullRow = prefix + eleList + "\\\\\n \\hline";
-        System.out.print(fullRow);
+        System.out.println(fullRow);
     }
 }
