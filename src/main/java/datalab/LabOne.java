@@ -15,8 +15,11 @@ public class LabOne {
             e.printStackTrace();
             return;
         }
-
+        Long fullProgStartTIme = System.currentTimeMillis();
+        // Important global variables
         Integer numRows = 5000000;
+        Integer numTests = 10;
+
         Integer minColValue = 1;
         Integer maxColValue = 50000;
         String columnAName = "columnA";
@@ -25,12 +28,17 @@ public class LabOne {
         if (numRows < maxColValue) {
             maxColValue = numRows;
         }
-        Integer numTests = 3;
         ArrayList<Integer> testSetA = generateTestCases(numTests, minColValue, maxColValue);
         ArrayList<Integer> testSetB = generateTestCases(numTests, minColValue, maxColValue);
+        ArrayList<Integer> testSetC1 = generateTestCases(numTests, minColValue, maxColValue);
+        ArrayList<Integer> testSetC2 = generateTestCases(numTests, minColValue, maxColValue);
+        System.out.println("TestSetA" + testSetA);
+        System.out.println("TestSetB" + testSetB);
         Map<String, ArrayList<Integer>> fullTestSet = new HashMap<>();
         fullTestSet.put(columnAName, testSetA);
         fullTestSet.put(columnBName, testSetB);
+        fullTestSet.put("testSetC1", testSetC1);
+        fullTestSet.put("testSetC2", testSetC2);
 
         TestDatabase tdb = new TestDatabase(numRows, columnAName, columnBName, fullTestSet, noIndex);
 
@@ -41,15 +49,13 @@ public class LabOne {
             VariationOne firstVariationData = new VariationOne(numRows, minColValue, maxColValue);
             VariationTwo secondVariationData = new VariationTwo(numRows, minColValue, maxColValue);
 
-            tdb.loadRows(firstVariationData);
-            tdb.resetDatabase();
-            tdb.loadRows(secondVariationData);
-
-
-            Map<String, ArrayList<Long>> testResultsLoadOne, testResultsLoadTwo = new HashMap<>();
+            Map<String, ArrayList<Long>> testResultsLoadOne, testResultsLoadTwo;
             testResultsLoadOne = tdb.runOneGeneratorTests(firstVariationData);
             testResultsLoadTwo = tdb.runOneGeneratorTests(secondVariationData);
-            formLatexRows(testResultsLoadOne, testResultsLoadTwo);
+            formLatexRows(testResultsLoadOne, testResultsLoadTwo, noIndex);
+
+            Long fullProgEndTime = System.currentTimeMillis();
+            System.out.println("Full program run time was " + (fullProgEndTime - fullProgStartTIme)/(1000.0*60.0) + " minutes.");
 
 
         } catch (SQLException e) {
@@ -57,23 +63,26 @@ public class LabOne {
         } finally {
             try {
                 tdb.closeCon();
-            } catch (SQLException se) {
+            } catch (SQLException ignored) {
             }
         }
 
     }
 
-    private static void formLatexRows(Map<String, ArrayList<Long>> rs1, Map<String, ArrayList<Long>> rs2) {
-       ArrayList<Long> latexRow = new ArrayList<Long>();
-       Integer numQueryTypes = 3;
-       Integer physOrgNum = 1;
+    private static void formLatexRows(Map<String, ArrayList<Long>> rs1, Map<String, ArrayList<Long>> rs2, String noIdx) {
+       ArrayList<Long> rawLatexRow = new ArrayList<>();
+       Long rs1EleRaw, rs2EleRaw;
+       Integer numQueryTypes = 4;
        for (String key : rs1.keySet()) {
            for (int i = 0; i < numQueryTypes; i++) {
-               latexRow.add(rs1.get(key).get(i));
-               latexRow.add(rs1.get(key).get(i));
+               rs1EleRaw = rs1.get(key).get(i);
+               rs2EleRaw = rs2.get(key).get(i);
+               rawLatexRow.add(rs1EleRaw);
+               rawLatexRow.add(rs2EleRaw);
            }
-           printLatexRow(latexRow, physOrgNum++);
-           latexRow.clear();
+           System.out.println(key + " Data: " +rawLatexRow);
+           printLatexRow(rawLatexRow, key);
+           rawLatexRow.clear();
        }
     }
 
@@ -88,10 +97,10 @@ public class LabOne {
     }
 
 
-    private static void printLatexRow(ArrayList<Long> results, Integer runNumber) {
+    private static void printLatexRow(ArrayList<Long> results, String physOrg) {
         String prefix, eleList, fullRow;
         eleList = "";
-        prefix = "    \\multicolumn{2}{|r|}{" + runNumber.toString() + "} ";
+        prefix = "    \\multicolumn{2}{|r||}{" + physOrg + "} ";
         for (Long ele : results) {
             eleList = eleList + "& " + ele.toString() + " ";
         }

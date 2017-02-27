@@ -3,33 +3,20 @@ package datalab;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 /**
  * Created with loving care by howie on 2/23/17.
  */
-public class RandomData {
+class RandomData {
     private Integer numElements;
 
-    public RandomData(Integer numEle) {
+    RandomData(Integer numEle) {
         numElements = numEle;
     }
 
-
-//    public ArrayList<Integer> generateColumn() {
-//        ArrayList<Integer> colValues = new ArrayList<Integer>(numElements);
-//        Integer maxValue = 50000;
-//        Integer minValue = 1;
-//        Random rando = new Random();
-//        for (int i = 0; i < numElements; i++) {
-//            colValues.add(rando.nextInt(maxValue) + minValue);
-//        }
-//        return colValues;
-//    }
-
-    public ArrayList<Integer> generateColumn(Integer minValue, Integer maxValue) {
+    ArrayList<Integer> generateColumn(Integer minValue, Integer maxValue) {
         ArrayList<Integer> colValues = new ArrayList<>(numElements);
         for (int i = 0; i < numElements; i++) {
             colValues.add(i % maxValue + minValue);
@@ -37,13 +24,12 @@ public class RandomData {
         Collections.shuffle(colValues);
         return colValues;
     }
-    public ArrayList<String> generateText() {
+    ArrayList<String> generateText() {
         int eleInField = 240;
-        char character, swapChar;
-        String str;
-        LinkedList<Character> masterString = new LinkedList<Character>();
-        ArrayList<String> intermediateStrings = new ArrayList<String>(eleInField);
-        ArrayList<String> column = new ArrayList<String>(numElements);
+        char swapChar;
+        LinkedList<Character> masterString;
+        ArrayList<String> intermediateStrings = new ArrayList<>(eleInField);
+        ArrayList<String> column = new ArrayList<>(numElements);
         masterString = IntStream.range(0, eleInField).boxed()
                 .map(i -> i % 127)
                 .map(i -> ((i < 33) ? i + 33 : i ))

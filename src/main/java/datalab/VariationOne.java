@@ -8,19 +8,23 @@ public class VariationOne implements DataToInsert {
     private ArrayList<Integer> primaryKey, columnA, columnB;
     private ArrayList<String> textColumn;
     private Integer numElements;
-    private RandomData randomData;
 
     public VariationOne(Integer numEle, Integer minColValue, Integer maxColValue){
         numElements = numEle;
-        randomData = new RandomData(numElements);
+        RandomData randomData = new RandomData(numElements);
         primaryKey = generatePrimaryKey();
         columnA = randomData.generateColumn(minColValue, maxColValue);
         columnB = randomData.generateColumn(minColValue, maxColValue);
         textColumn = randomData.generateText();
+
+        assert primaryKey.size() == numElements;
+        assert columnA.size() == primaryKey.size();
+        assert columnB.size() == columnA.size();
+        assert textColumn.size() == columnB.size();
     }
 
-    public ArrayList<Integer> generatePrimaryKey() {
-        ArrayList<Integer> key = new ArrayList<Integer>(numElements);
+    private ArrayList<Integer> generatePrimaryKey() {
+        ArrayList<Integer> key = new ArrayList<>(numElements);
         for (int i = 0; i < numElements; i++){
             key.add(i);
         }

@@ -7,14 +7,14 @@ import java.util.*;
 /**
  * Created with loving care by howie on 2/25/17.
  */
-public class TestDatabase {
+class TestDatabase {
 
     private Connection connection;
     private Integer numberRows, numTests;
     private String columnAName, columnBName, noIndex;
     private Map<String, ArrayList<Integer>> testSets;
 
-    public TestDatabase(Integer numRows, String colAName, String colBName, Map<String, ArrayList<Integer>> tests, String noIdx) {
+    TestDatabase(Integer numRows, String colAName, String colBName, Map<String, ArrayList<Integer>> tests, String noIdx) {
 
         numberRows = numRows;
         columnAName = colAName;
@@ -24,28 +24,42 @@ public class TestDatabase {
         numTests = testSets.keySet().stream().map(p -> testSets.get(p)).map(p -> p.size()).reduce((a, b) -> Math.min(a, b)).get();
     }
 
-    public Map<String, ArrayList<Long>> runOneGeneratorTests(DataToInsert data) throws SQLException {
+    Map<String, ArrayList<Long>> runOneGeneratorTests(DataToInsert data) throws SQLException {
         // resultSet : {'physical organization': [times for each query]}
         Map<String, ArrayList<Long>> resultSet = new HashMap<>();
+        ArrayList<Long> oneOrgResults = new ArrayList<>(4);
+        Long insertTime;
 
         resetDatabase();
-        loadRows(data);
-        resultSet.put(noIndex, runThreeQueries());
+        insertTime = loadRows(data);
+        oneOrgResults.add(insertTime);
+        oneOrgResults.addAll(runThreeQueries());
+        resultSet.put(noIndex, new ArrayList<>(oneOrgResults));
+        oneOrgResults.clear();
 
         resetDatabase();
-        loadRows(data);
         createSingleConfig(columnAName);
-        resultSet.put(columnAName, runThreeQueries());
+        insertTime = loadRows(data);
+        oneOrgResults.add(insertTime);
+        oneOrgResults.addAll(runThreeQueries());
+        resultSet.put(columnAName, new ArrayList<>(oneOrgResults));
+        oneOrgResults.clear();
 
         resetDatabase();
-        loadRows(data);
         createSingleConfig(columnBName);
-        resultSet.put(columnBName, runThreeQueries());
+        insertTime = loadRows(data);
+        oneOrgResults.add(insertTime);
+        oneOrgResults.addAll(runThreeQueries());
+        resultSet.put(columnBName, new ArrayList<>(oneOrgResults));
+        oneOrgResults.clear();
 
         resetDatabase();
-        loadRows(data);
         createBothConfig();
-        resultSet.put(columnAName + columnBName, runThreeQueries());
+        insertTime = loadRows(data);
+        oneOrgResults.add(insertTime);
+        oneOrgResults.addAll(runThreeQueries());
+        resultSet.put(columnAName + columnBName, new ArrayList<>(oneOrgResults));
+        oneOrgResults.clear();
 
         return resultSet;
     }
@@ -58,7 +72,11 @@ public class TestDatabase {
         testCase.clear();
         testCase.put(columnBName, testSets.get(columnBName));
         testResults.add(testOneQuery(testCase));
-        testResults.add(testOneQuery(testSets));
+        testCase.clear();
+        testCase.put(columnAName, testSets.get("testSetC1"));
+        testCase.put(columnBName, testSets.get("testSetC2"));
+        testResults.add(testOneQuery(testCase));
+        testCase.clear();
 
         return testResults;
     }
@@ -67,6 +85,7 @@ public class TestDatabase {
         String queryStr;
         ArrayList<String> cols = new ArrayList<>(1);
         if (testCases.size() == 1) {
+            // implicit assumption that the name of the key is the name of the column
             cols.add(testCases.keySet().iterator().next());
             queryStr = "SELECT * FROM benchmark WHERE benchmark." + cols.get(0) + "= ?;";
         } else {
@@ -75,6 +94,7 @@ public class TestDatabase {
             queryStr = "SELECT * FROM benchmark WHERE benchmark." + columnAName + " = ? AND benchmark." + columnBName + " = ?;";
         }
         long avgTime = 0;
+        long numberTests = (long) numTests;
         long startTime, endTime;
         int queryParamPos;
         PreparedStatement stmt = connection.prepareStatement(queryStr);
@@ -88,48 +108,12 @@ public class TestDatabase {
             endTime = System.currentTimeMillis();
             avgTime += (endTime - startTime);
         }
-        avgTime /= numTests;
+        avgTime /= numberTests;
         return avgTime;
 
     }
 
-//    public Long runBiVarQuery(ArrayList<Integer> testCasesA, ArrayList<Integer> testCasesB) throws SQLException {
-//        String queryStr = "SELECT * FROM benchmark WHERE benchmark.columnA = ? AND benchmark.columnB = ?;";
-//        long avgTime = 0;
-//        PreparedStatement stmt =  connection.prepareStatement(queryStr);
-//        long startTime, endTime;
-//        Integer minSize = Math.min(testCasesA.size(), testCasesB.size());
-//        for (int i = 0; i < minSize; i++) {
-//            stmt.setInt(1, testCasesA.get(i));
-//            stmt.setInt(2, testCasesB.get(i));
-//            startTime = System.currentTimeMillis();
-//            stmt.executeQuery();
-//            endTime = System.currentTimeMillis();
-//            avgTime += (endTime - startTime);
-//        }
-//        avgTime /= minSize;
-//
-//        return avgTime;
-//    }
-//
-//    public Long runUniVarQuery(ArrayList<Integer> testCases, String column) throws SQLException {
-//        String queryStr = "SELECT * FROM benchmark WHERE benchmark." + column + "= ?;";
-//        long avgTime = 0;
-//        PreparedStatement stmt = connection.prepareStatement(queryStr);
-//        long startTime, endTime;
-//        for (Integer ele : testCases) {
-//            stmt.setInt(1, ele);
-//            startTime = System.currentTimeMillis();
-//            stmt.executeQuery();
-//            endTime = System.currentTimeMillis();
-//            avgTime += (endTime - startTime);
-//        }
-//        avgTime /= testCases.size();
-//
-//        return avgTime;
-//    }
-
-    public void loadRows(DataToInsert data) throws SQLException {
+    private Long loadRows(DataToInsert data) throws SQLException {
         String baseQuery;
         baseQuery = "INSERT INTO benchmark (theKey, " + columnAName + ", " + columnBName + ", filler) VALUES (?, ?, ?, ?);";
         String variationName = data.getClass().getName();
@@ -146,11 +130,14 @@ public class TestDatabase {
         stmt.executeBatch();
         connection.commit();
         long endTime = System.currentTimeMillis();
-        System.out.println(variationName + " took " + ((endTime - startTime) / 1000.0) + " seconds.");
+        long timeTaken = endTime - startTime;
+        System.out.println(variationName + " took " + (timeTaken / 1000.0) + " seconds.");
         connection.setAutoCommit(true);
+
+        return timeTaken;
     }
 
-    public void createSingleConfig(String colName) throws SQLException {
+    private void createSingleConfig(String colName) throws SQLException {
         String indexStr;
         Statement indexStmt;
         indexStr = "CREATE INDEX " + colName + "_idx ON benchmark (" + colName + ");";
@@ -158,21 +145,21 @@ public class TestDatabase {
         indexStmt.executeUpdate(indexStr);
     }
 
-    public void createBothConfig() throws SQLException {
+    private void createBothConfig() throws SQLException {
         createSingleConfig(columnAName);
         createSingleConfig(columnBName);
     }
 
-    public void resetDatabase() throws SQLException {
+    void resetDatabase() throws SQLException {
         resetSchema();
         createTable();
     }
 
-    public void closeCon() throws SQLException {
+    void closeCon() throws SQLException {
         connection.close();
     }
 
-    public void openCon() throws SQLException {
+    void openCon() throws SQLException {
         // I know to not normally code db credentials into my code
         connection = DriverManager.getConnection("jdbc:postgresql://localhost:32768/postgres", "postgres", "postgres");
     }
