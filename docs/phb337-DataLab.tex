@@ -77,5 +77,16 @@
 \end{tabularx}
 \end{table}
 
+\section*{Explanation of Results}
+The most apparent difference between the physical organizations is that adding an index results
+in a significant speed-up when querying on the indexed column. For instance, it's clear that adding
+an index on column A sped up the first query \(\texttt{WHERE columnA = ?}\) but had little to no effect on query 2 \(\texttt{WHERE columnB = ?}\).
+Using the \texttt{EXPLAIN} command, I found that postgres was indeed adding a B-tree index on columns which contained
+a substantial amount of data. An interesting observation was that postgres added a bitmap index
+to indexed columns when the table was un-populated.
+In terms of loading data, adding random data was always slower than adding sorted data.
+This is most likely due to have to re-balance the tree while adding random data.
+Furthermore, two indexes resulted in a 110\% increase in load time which is noticeable, but a decent trade-off for the 1000\% decrease in \texttt{SELECT} query time.
+
 
 \end{document}
